@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f5f7">
+<title>Print Desk — калькулятор фотопечати</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f3f5f7;--surface:#fff;--surface2:#f7f8fa;--text:#17191d;
+  --muted:#727984;--line:#e4e7eb;--accent:#20252d;--accentText:#fff;
+  --green:#168653;--red:#c33d45;--input:#fff;--shadow:0 5px 22px rgba(20,30,45,.055);
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111419;--surface:#1b2027;--surface2:#242a33;--text:#f1f3f5;
+  --muted:#a0a8b3;--line:#343c47;--accent:#f1f3f5;--accentText:#17191d;
+  --green:#53c78b;--red:#ff737b;--input:#202630;--shadow:0 5px 22px rgba(0,0,0,.18);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:0 0 calc(28px + env(safe-area-inset-bottom))}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:760px;margin:0 auto;padding:18px 14px 30px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 18px}
+.brand{font-weight:850;font-size:20px;letter-spacing:-.5px}
+.brand small{display:block;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:0}
+.header-actions{display:flex;gap:8px}
+.icon-btn,.ghost-btn,.mini-btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:10px 12px}
+.icon-btn{min-width:42px}
+h1{font-size:25px;line-height:1.15;margin:0 0 5px;letter-spacing:-.7px}
+.lead{color:var(--muted);font-size:13px;margin:0 0 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 13px;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.card h2{font-size:16px;margin:0;font-weight:780}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:750}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 6px}
+.field{min-width:0}
+select,input{width:100%;height:44px;border:1px solid var(--line);border-radius:11px;background:var(--input);color:var(--text);padding:0 11px;outline:none}
+select:focus,input:focus{border-color:var(--muted);box-shadow:0 0 0 3px color-mix(in srgb,var(--muted) 15%,transparent)}
+.builder-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.quantity-line{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:11px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:11px;overflow:hidden;height:44px;background:var(--input)}
+.stepper button{height:100%;width:42px;border:0;background:var(--surface2);color:var(--text);font-size:20px}
+.stepper input{border:0;border-radius:0;text-align:center;width:58px;padding:0;box-shadow:none!important}
+.btn{border:0;border-radius:12px;background:var(--accent);color:var(--accentText);font-weight:750;padding:13px 16px;min-height:44px}
+.btn.full{width:100%;margin-top:13px}
+.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line)}
+.btn.small{min-height:36px;padding:8px 11px;font-size:13px}
+.quick-qty{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.quick-qty button{border:1px solid var(--line);background:var(--surface2);color:var(--text);padding:6px 10px;border-radius:9px;font-size:12px}
+.order-empty{padding:24px 8px;text-align:center;color:var(--muted);font-size:13px}
+.order-list{display:grid;gap:9px}
+.order-item{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--surface)}
+.item-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.item-name{font-weight:780;font-size:14px}
+.item-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.item-total{font-weight:850;white-space:nowrap}
+.item-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.item-controls-left{display:flex;align-items:center;gap:6px}
+.qty-pill{font-size:12px;color:var(--muted);min-width:62px;text-align:center}
+.mini-btn{padding:6px 10px;border-radius:9px;font-size:12px}
+.delete{color:var(--red)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+.metric{background:var(--surface2);border-radius:13px;padding:11px}
+.metric span{display:block;color:var(--muted);font-size:11px;font-weight:650}
+.metric strong{display:block;font-size:18px;margin-top:2px}
+.total-panel{margin-top:12px;background:var(--accent);color:var(--accentText);border-radius:15px;padding:16px}
+.total-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.total-row .caption{font-size:12px;opacity:.7}
+.total-amount{font-size:29px;font-weight:900;letter-spacing:-.7px}
+.extra-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.extra-grid input{height:40px}
+.inline-note{font-size:11px;color:var(--muted);margin-top:6px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.toolbar .btn{flex:1}
+details{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+summary{cursor:pointer;font-weight:780;list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary:after{content:"＋";color:var(--muted);font-size:18px}
+details[open] summary:after{content:"−"}
+.settings-intro{font-size:12px;color:var(--muted);margin:9px 0 13px}
+.price-section{margin-top:16px}
+.price-section h3{font-size:13px;margin:0 0 9px}
+.price-row{display:grid;grid-template-columns:minmax(0,1fr) 94px 94px;gap:8px;align-items:center;margin:7px 0}
+.price-row .price-label{font-size:12px}
+.price-row input{height:38px;padding:0 8px;font-size:13px}
+.price-head{display:grid;grid-template-columns:minmax(0,1fr) 94px 94px;gap:8px;color:var(--muted);font-size:10px;font-weight:750;margin-bottom:5px}
+.settings-actions{display:flex;gap:8px;margin-top:14px}
+.settings-actions button{flex:1}
+.notice{background:var(--surface2);border-radius:11px;padding:10px 11px;color:var(--muted);font-size:11px;margin-top:12px}
+.customer{margin-bottom:12px}
+.hidden{display:none!important}
+@media(min-width:620px){.app{padding:25px 20px}.card{padding:19px}.builder-grid{grid-template-columns:repeat(4,1fr)}.quantity-line{grid-template-columns:1fr auto}.order-list{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.app{padding-left:10px;padding-right:10px}.card{padding:13px}.price-row,.price-head{grid-template-columns:minmax(0,1fr) 76px 76px}.total-amount{font-size:25px}}
+@media print{
+  body{background:#fff;color:#000}.app{max-width:none;padding:0}.no-print,header .header-actions,.builder,.settings,details,.toolbar button{display:none!important}
+  .card,.order-item{box-shadow:none;border-color:#ddd;break-inside:avoid}.total-panel{background:#eee;color:#000}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">PRINT DESK<small>Калькулятор фотопечати</small></div>
+  <div class="header-actions">
+    <button class="icon-btn" id="themeToggle" aria-label="Переключить тему" title="Дневной / ночной режим">☾</button>
+    <button class="icon-btn" id="exportBtn" aria-label="Экспорт заказа" title="Скачать заказ">↓</button>
+  </div>
+</header>
+
+<h1>Расчёт заказа</h1>
+<p class="lead">Добавляй разные варианты печати в один заказ — сумма пересчитается автоматически.</p>
+
+<section class="card builder no-print">
+  <div class="card-head"><h2>Добавить фотографии</h2><span class="eyebrow">Новая позиция</span></div>
+  <div class="builder-grid">
+    <div class="field"><label for="format">Формат листа</label>
+      <select id="format"><option value="A4">А4</option><option value="10x15">10 × 15 см</option></select>
+    </div>
+    <div class="field"><label for="paper">Бумага</label>
+      <select id="paper"><option value="glossy">Глянцевая</option><option value="matte">Матовая</option></select>
+    </div>
+    <div class="field"><label for="template">Шаблон</label>
+      <select id="template"><option value="instax">Instax</option><option value="polaroid">Polaroid</option><option value="photo">10 × 15</option><option value="fiji">Fiji</option></select>
+    </div>
+    <div class="field"><label for="qty">Количество, шт.</label>
+      <div class="stepper"><button type="button" id="minus">−</button><input id="qty" type="number" inputmode="numeric" min="1" step="1" value="1"><button type="button" id="plus">+</button></div>
+    </div>
+  </div>
+  <div class="quick-qty">
+    <button type="button" data-qty="4">4 шт.</button><button type="button" data-qty="8">8 шт.</button><button type="button" data-qty="10">10 шт.</button><button type="button" data-qty="20">20 шт.</button><button type="button" data-qty="50">50 шт.</button>
+  </div>
+  <button class="btn full" id="addBtn">＋ Добавить в заказ</button>
+  <div class="inline-note">Если комбинация уже есть в заказе, количество добавится к существующей строке.</div>
+</section>
+
+<section class="card">
+  <div class="card-head"><h2>Состав заказа</h2><span class="eyebrow" id="lineCount">0 позиций</span></div>
+  <div class="customer no-print"><label for="customer">Клиент / номер заказа (необязательно)</label><input id="customer" placeholder="Например, Анна или заказ №015"></div>
+  <div id="orderList" class="order-list"><div class="order-empty">Заказ пока пуст. Добавь первую позицию выше.</div></div>
+  <div class="metrics">
+    <div class="metric"><span>Всего фотографий</span><strong id="photoCount">0</strong></div>
+    <div class="metric"><span>Позиций в заказе</span><strong id="positionCount">0</strong></div>
+  </div>
+  <div class="extra-grid no-print">
+    <div><label for="discount">Скидка, %</label><input id="discount" type="number" min="0" max="100" step="1" value="0" inputmode="decimal"></div>
+    <div><label for="extra">Доп. расходы / упаковка, ₽</label><input id="extra" type="number" min="0" step="0.01" value="0" inputmode="decimal"></div>
+  </div>
+  <div class="total-panel">
+    <div class="total-row"><div><div class="caption">К ОПЛАТЕ</div><div class="total-amount" id="grandTotal">0 ₽</div></div><div style="text-align:right"><div class="caption">Скидка</div><strong id="discountValue">0 ₽</strong></div></div>
+  </div>
+  <div class="toolbar no-print">
+    <button class="btn secondary" id="copyBtn">Копировать расчёт</button>
+    <button class="btn secondary" id="printBtn">Печать / PDF</button>
+    <button class="btn secondary" id="clearBtn">Очистить</button>
+  </div>
+  <div class="inline-note">Расчёт основан на розничной цене за одну готовую фотографию. Дополнительные расходы прибавляются к сумме после скидки.</div>
+</section>
+
+<section class="card settings no-print">
+  <div class="card-head"><h2>Цены и себестоимость</h2><span class="eyebrow">Настройки</span></div>
+  <div class="settings-intro">Задай цену продажи и, при желании, себестоимость одной фотографии. Настройки сохраняются в этом браузере автоматически.</div>
+  <details id="priceDetails">
+    <summary>Открыть таблицу тарифов</summary>
+    <div class="settings-intro">В каждой строке можно указать цену для клиента и себестоимость. Если себестоимость не нужна — оставь 0.</div>
+    <div id="priceSettings"></div>
+    <div class="settings-actions">
+      <button class="btn secondary small" id="resetPrices">Сбросить тарифы</button>
+      <button class="btn secondary small" id="backupPrices">Экспорт тарифов</button>
+    </div>
+  </details>
+  <div class="metrics">
+    <div class="metric"><span>Выручка до скидки</span><strong id="revenue">0 ₽</strong></div>
+    <div class="metric"><span>Расчётная себестоимость</span><strong id="cost">0 ₽</strong></div>
+    <div class="metric"><span>Прибыль после скидки</span><strong id="profit">0 ₽</strong></div>
+    <div class="metric"><span>Маржа от оплаты</span><strong id="margin">0%</strong></div>
+  </div>
+  <div class="notice">Себестоимость здесь считается по введённой сумме на одну фотографию. Если удобнее считать расход по листам бумаги, впоследствии можно добавить отдельный режим раскладки по листам.</div>
+</section>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const formats = {A4:"А4", "10x15":"10 × 15 см"};
+  const papers = {matte:"Матовая", glossy:"Глянцевая"};
+  const templates = {instax:"Instax", polaroid:"Polaroid", photo:"10 × 15", fiji:"Fiji"};
+  const makeDefaults = () => {
+    const result = {};
+    for (const f of Object.keys(formats)) {
+      result[f] = {};
+      for (const p of Object.keys(papers)) {
+        result[f][p] = {};
+        for (const t of Object.keys(templates)) result[f][p][t] = {sell:0,cost:0};
+      }
+    }
+    return result;
+  };
+  const defaults = makeDefaults();
+  const read = (key, fallback) => {
+    try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+    catch { return fallback; }
+  };
+  let prices = read("printDeskPricesV2", defaults);
+  let order = read("printDeskOrderV2", []);
+  let theme = read("printDeskTheme", "light");
+
+  // Мягкая миграция старых тарифов из первой версии калькулятора.
+  for (const f of Object.keys(formats)) for (const p of Object.keys(papers)) for (const t of Object.keys(templates)) {
+    const old = prices?.[f]?.[p]?.[t];
+    if (typeof old === "number") prices[f][p][t] = {sell:old,cost:0};
+    if (!prices?.[f]?.[p]?.[t] || typeof prices[f][p][t] !== "object") prices[f][p][t] = {sell:0,cost:0};
+    if (!Number.isFinite(Number(prices[f][p][t].sell))) prices[f][p][t].sell = 0;
+    if (!Number.isFinite(Number(prices[f][p][t].cost))) prices[f][p][t].cost = 0;
+  }
+
+  const num = v => Number.isFinite(Number(v)) ? Math.max(0, Number(v)) : 0;
+  const money = v => new Intl.NumberFormat("ru-RU",{style:"currency",currency:"RUB",maximumFractionDigits:2}).format(v);
+  const getRate = item => prices[item.format][item.paper][item.template] || {sell:0,cost:0};
+  const save = () => {
+    try {
+      localStorage.setItem("printDeskPricesV2",JSON.stringify(prices));
+      localStorage.setItem("printDeskOrderV2",JSON.stringify(order));
+      localStorage.setItem("printDeskTheme",theme);
+    } catch(e) { console.warn("Не удалось сохранить настройки браузера",e); }
+  };
+  const keyOf = x => [x.format,x.paper,x.template].join("|");
+  const safe = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  function setTheme() {
+    document.documentElement.dataset.theme = theme;
+    $("themeToggle").textContent = theme === "dark" ? "☀" : "☾";
+    $("themeToggle").title = theme === "dark" ? "Включить дневной режим" : "Включить ночной режим";
+    document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#111419" : "#f4f5f7";
+  }
+  $("themeToggle").addEventListener("click",()=>{theme=theme==="dark"?"light":"dark";setTheme();save();});
+
+  function addItem() {
+    const item = {
+      format:$("format").value, paper:$("paper").value,
+      template:$("template").value, quantity:Math.floor(num($("qty").value))
+    };
+    if (item.quantity < 1) { alert("Укажи количество не меньше 1."); $("qty").focus(); return; }
+    const existing = order.find(x=>keyOf(x)===keyOf(item));
+    if (existing) existing.quantity += item.quantity;
+    else order.push({...item,id:Date.now()+Math.random()});
+    $("qty").value = 1;
+    save(); render();
+  }
+  $("addBtn").addEventListener("click",addItem);
+  $("minus").addEventListener("click",()=>{$("qty").value=Math.max(1,Math.floor(num($("qty").value))-1);});
+  $("plus").addEventListener("click",()=>{$("qty").value=Math.max(1,Math.floor(num($("qty").value))+1);});
+  document.querySelectorAll("[data-qty]").forEach(b=>b.addEventListener("click",()=>$("qty").value=b.dataset.qty));
+
+  function updateQuantity(id,delta) {
+    const x=order.find(i=>String(i.id)===String(id)); if(!x)return;
+    x.quantity=Math.max(1,Math.floor(x.quantity+delta)); save(); render();
+  }
+  function removeItem(id) { order=order.filter(i=>String(i.id)!==String(id));save();render(); }
+  function renderOrder() {
+    const host=$("orderList");
+    if(!order.length) host.innerHTML='<div class="order-empty">Заказ пока пуст. Добавь первую позицию выше.</div>';
+    else host.innerHTML=order.map((x,i)=>{
+      const rate=getRate(x), sum=rate.sell*x.quantity;
+      return `<article class="order-item">
+        <div class="item-top"><div><div class="item-name">${i+1}. ${formats[x.format]} · ${papers[x.paper]}</div>
+        <div class="item-sub">${templates[x.template]} · ${money(rate.sell)} за фото</div></div>
+        <div class="item-total">${money(sum)}</div></div>
+        <div class="item-controls"><div class="item-controls-left">
+          <button class="mini-btn" data-action="minus" data-id="${safe(x.id)}" aria-label="Уменьшить">−</button>
+          <span class="qty-pill">${x.quantity} шт.</span>
+          <button class="mini-btn" data-action="plus" data-id="${safe(x.id)}" aria-label="Увеличить">+</button>
+        </div><button class="mini-btn delete" data-action="delete" data-id="${safe(x.id)}">Удалить</button></div>
+        ${rate.sell===0?'<div class="inline-note" style="color:var(--red)">Цена не задана — укажи её в настройках тарифов.</div>':''}
+      </article>`;
+    }).join("");
+    host.querySelectorAll("button[data-action]").forEach(b=>b.addEventListener("click",()=>{
+      const id=b.dataset.id;
+      if(b.dataset.action==="plus")updateQuantity(id,1);
+      if(b.dataset.action==="minus")updateQuantity(id,-1);
+      if(b.dataset.action==="delete")removeItem(id);
+    }));
+  }
+  function calc() {
+    const gross=order.reduce((s,x)=>s+getRate(x).sell*x.quantity,0);
+    const cost=order.reduce((s,x)=>s+getRate(x).cost*x.quantity,0);
+    const qty=order.reduce((s,x)=>s+x.quantity,0);
+    const discountPct=Math.min(100,num($("discount").value));
+    const discount=gross*discountPct/100;
+    const extra=num($("extra").value);
+    const payable=Math.max(0,gross-discount+extra);
+    const profit=payable-cost-extra;
+    const margin=payable>0?profit/payable*100:0;
+    $("photoCount").textContent=qty.toLocaleString("ru-RU");
+    $("positionCount").textContent=order.length.toLocaleString("ru-RU");
+    $("lineCount").textContent=order.length+" "+(order.length===1?"позиция":order.length>=2&&order.length<=4?"позиции":"позиций");
+    $("grandTotal").textContent=money(payable);
+    $("discountValue").textContent=money(discount);
+    $("revenue").textContent=money(gross);
+    $("cost").textContent=money(cost);
+    $("profit").textContent=money(profit);
+    $("margin").textContent=margin.toFixed(1).replace(".",",")+"%";
+    return {gross,cost,qty,discount,extra,payable,profit,margin};
+  }
+  function render() {renderOrder();calc();save();}
+
+  function renderPrices() {
+    let html="";
+    for(const f of Object.keys(formats)) {
+      html+=`<div class="price-section"><h3>Формат ${formats[f]}</h3>`;
+      for(const p of Object.keys(papers)) {
+        html+=`<div class="price-section"><h3>${papers[p]} бумага</h3>
+          <div class="price-head"><span>Шаблон</span><span>Продажа ₽</span><span>Себест. ₽</span></div>`;
+        for(const t of Object.keys(templates)) {
+          const r=prices[f][p][t];
+          html+=`<div class="price-row"><span class="price-label">${templates[t]}</span>
+          <input type="number" min="0" step="0.01" inputmode="decimal" aria-label="Цена продажи ${formats[f]} ${papers[p]} ${templates[t]}" data-price="${f}|${p}|${t}|sell" value="${r.sell}">
+          <input type="number" min="0" step="0.01" inputmode="decimal" aria-label="Себестоимость ${formats[f]} ${papers[p]} ${templates[t]}" data-price="${f}|${p}|${t}|cost" value="${r.cost}"></div>`;
+        }
+        html+="</div>";
+      }
+      html+="</div>";
+    }
+    $("priceSettings").innerHTML=html;
+    $("priceSettings").querySelectorAll("[data-price]").forEach(input=>{
+      input.addEventListener("change",()=>{
+        const [f,p,t,k]=input.dataset.price.split("|");
+        prices[f][p][t][k]=num(input.value);
+        input.value=prices[f][p][t][k];
+        save();render();
+      });
+    });
+  }
+  $("discount").addEventListener("input",calc);
+  $("extra").addEventListener("input",calc);
+  $("customer").value=read("printDeskCustomer","");
+  $("customer").addEventListener("input",()=>{try{localStorage.setItem("printDeskCustomer",$("customer").value)}catch{}});
+  $("clearBtn").addEventListener("click",()=>{
+    if(!order.length)return;
+    if(confirm("Очистить все позиции текущего заказа?")){order=[];$("customer").value="";$("discount").value=0;$("extra").value=0;save();render();try{localStorage.removeItem("printDeskCustomer")}catch{}}
+  });
+  function orderText() {
+    const c=calc(); const customer=$("customer").value.trim();
+    let s="ЗАКАЗ НА ФОТОПЕЧАТЬ\n";
+    if(customer)s+="Клиент / заказ: "+customer+"\n";
+    s+="\n";
+    order.forEach((x,i)=>{const r=getRate(x);s+=`${i+1}. ${formats[x.format]}, ${papers[x.paper]}, ${templates[x.template]}\n${x.quantity} шт. × ${money(r.sell)} = ${money(r.sell*x.quantity)}\n`;});
+    s+=`\nВсего фотографий: ${c.qty}\nСумма: ${money(c.gross)}\nСкидка: ${money(c.discount)}\nДоп. расходы: ${money(c.extra)}\nК ОПЛАТЕ: ${money(c.payable)}`;
+    return s;
+  }
+  $("copyBtn").addEventListener("click",async()=>{
+    if(!order.length){alert("Сначала добавь позиции в заказ.");return;}
+    try{await navigator.clipboard.writeText(orderText());alert("Расчёт скопирован.");}
+    catch{const ta=document.createElement("textarea");ta.value=orderText();document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();alert("Расчёт скопирован.");}
+  });
+  $("printBtn").addEventListener("click",()=>{if(!order.length){alert("Заказ пуст.");return;}window.print();});
+  function download(name,content,type="text/plain;charset=utf-8") {
+    const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);
+  }
+  $("exportBtn").addEventListener("click",()=>{if(!order.length){alert("Заказ пуст.");return;}download("zakaz-fotopechat.txt",orderText());});
+  $("backupPrices").addEventListener("click",()=>download("tarify-fotopechat.json",JSON.stringify(prices,null,2),"application/json"));
+  $("resetPrices").addEventListener("click",()=>{
+    if(confirm("Сбросить все цены продажи и себестоимости до 0?")){prices=makeDefaults();save();renderPrices();render();}
+  });
+  setTheme();renderPrices();render();
+})();
+</script>
+</body>
+</html>
